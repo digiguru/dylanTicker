@@ -18,7 +18,14 @@ var
     dirArray = [];
 var LEDLightBoard = {
     Font: Fonts.Simple8(),
-    Paper: Raphael("board", 900, 900)
+    Paper: Raphael("board", 900, 900),
+    CreateSentanceAndStartScrolling: function () {
+        TheTextMap = getTextMap(NextSentance());//arrText[0]);
+        var temp = TextPreparation[dir](TheTextMap);
+        QueuedLights = temp.Queued;
+        draw(temp.Onscreen);
+        //scrollText();  
+    }
 }
 var PositionHelper = {
     GetLightAt: function(row,column) {
@@ -29,28 +36,32 @@ var PositionHelper = {
     },
     Left: function(row,column) {
         if(row === 0) {
-            setTimeout('pixelOffScreen("","Left","' + row + '","' + column + '")', 20);
+            //setTimeout('pixelOffScreen("","Left","' + row + '","' + column + '")', 20);
+            pixelOffScreen("","Left",row,column);
             return myOffscreenLight;
         }
         return this.GetLightAt(row-1,column);
     },
     Right: function(row,column) {
         if(row === boardWidth-1) {
-            setTimeout('pixelOffScreen("","Right","' + row + '","' + column + '")', 20);
+            //setTimeout('pixelOffScreen("","Right","' + row + '","' + column + '")', 20);
+            pixelOffScreen("","Right",row,column);
             return myOffscreenLight;
         }
         return this.GetLightAt(row+1,column);
     },
     Up: function(row,column) {
         if(column === 0) {
-            setTimeout('pixelOffScreen("","Up","' + row + '","' + column + '")', 20);
+            //setTimeout('pixelOffScreen("","Up","' + row + '","' + column + '")', 20);
+            pixelOffScreen("","Up",row,column);
             return myOffscreenLight;
         }
         return this.GetLightAt(row,column-1);
     },
     Down: function(row,column) {
         if(column === boardHeight-1) {
-            setTimeout('pixelOffScreen("","Down","' + row + '","' + column + '")', 20);
+            //setTimeout('pixelOffScreen("","Down","' + row + '","' + column + '")', 20);
+            pixelOffScreen("","Down",row,column);
             return myOffscreenLight;
         }
         return this.GetLightAt(row,column+1);
@@ -62,59 +73,60 @@ var PositionHelper = {
         return {x: row * 6, y: column * 6}
     },
     CreateLight: function(row,column) {
-        var myLight = new Light(row,column);
+        var myLight = new this.Light(row,column);
         if(!lightHolder[row]) {
             lightHolder[row] = [];
         }
         
         lightHolder[row][column] = myLight;
+    },
+    Light: function(row,column)  {
+        this.row = row;
+        this.column = column;
+        var pos = PositionHelper.SetLightPosition(row,column)
+        this.graphic = LEDLightBoard.Paper.circle(pos.x, pos.y, PositionHelper.LightWidth());
+        this.graphic.attr({
+            fill: colLightOff,
+            stroke: colStroke,
+            model: this
+        });
+        this.On = function(){
+            //var anim = Raphael.animation({
+            this.graphic.attr({
+                "stroke-width": 2,
+                "fill": colLightOn,
+                "stroke": colLightOff
+            });
+            //this.graphic.animate(anim, speedLightOn);
+            return this;
+        };
+        this.Off = function(){
+            //var anim = Raphael.animation({
+             this.graphic.attr({
+                "stroke-width": 1,
+                "fill": colLightOff,
+                "stroke": colStroke
+            });
+            //this.graphic.animate(anim, speedLightOn);
+            return this;
+        };
+        this.Left =  function() {
+            return PositionHelper.Left(row,column);
+        };
+        this.Right = function() {
+            return PositionHelper.Right(row,column);
+        };
+        this.Up = function() {
+            return PositionHelper.Up(row,column);
+        };
+        this.Down = function() {
+            return PositionHelper.Down(row,column);
+        };
+        return this;
     }
 }
-var Light = function(row,column)  {
-    this.row = row;
-    this.column = column;
-    var pos = PositionHelper.SetLightPosition(row,column)
-    this.graphic = LEDLightBoard.Paper.circle(pos.x, pos.y, PositionHelper.LightWidth());
-    this.graphic.attr({
-        fill: colLightOff,
-        stroke: colStroke,
-        model: this
-    });
-    this.On = function(){
-        //var anim = Raphael.animation({
-        this.graphic.attr({
-            "stroke-width": 2,
-            "fill": colLightOn,
-            "stroke": colLightOff
-        });
-        //this.graphic.animate(anim, speedLightOn);
-        return this;
-    };
-    this.Off = function(){
-        //var anim = Raphael.animation({
-         this.graphic.attr({
-            "stroke-width": 1,
-            "fill": colLightOff,
-            "stroke": colStroke
-        });
-        //this.graphic.animate(anim, speedLightOn);
-        return this;
-    };
-    this.Left =  function() {
-        return PositionHelper.Left(row,column);
-    };
-    this.Right = function() {
-        return PositionHelper.Right(row,column);
-    };
-    this.Up = function() {
-        return PositionHelper.Up(row,column);
-    };
-    this.Down = function() {
-        return PositionHelper.Down(row,column);
-    };
-    return this;
-}
-var myOffscreenLight = new Light(-10,-10);
+
+var myOffscreenLight = new PositionHelper.Light(-10,-10);
        
 function createLights(rows,cols)
 {    
@@ -316,16 +328,16 @@ function scrollText() {
     if(totalOffLights === currentLights.length && QueuedLights.length === 0) {
         sequenceOffScreen("", [dir]);
     } else {
-        setTimeout('scrollText()', 25);
+        //setTimeout('scrollText()', 25);
         
     }
 }
 
-/*
+
 timer = setInterval(function() {
     scrollText()
-}, 25);
-*/
+}, 75);
+
 /*
 // Cross browser, backward compatible solution
 (function( window, Date ) {
@@ -372,7 +384,7 @@ animLoop(function( deltaT, now ) {
 
 //Events
 var sequenceOffScreen = function(e, type) {
-    CreateSentanceAndStartScrolling();
+    LEDLightBoard.CreateSentanceAndStartScrolling();
 },
     pixelOffScreen = function(e, type, row, column) {
     //Pixel left screen :)
@@ -388,40 +400,13 @@ var NextSentance = function() {
     dir = dirArray.shift();
     return mySentanceArray.shift();
 }
-var CreateSentanceAndStartScrolling = function () {
-    TheTextMap = getTextMap(NextSentance());//arrText[0]);
-    
-    var temp = TextPreparation[dir](TheTextMap);
-    //{Onscreen:onscreenLights,Queued:QueuedLights}
-    QueuedLights = temp.Queued;
-    draw(temp.Onscreen);
-    scrollText();  
-}
+
 
 var docReady = function(){
     createLights(boardWidth, boardHeight);
-    CreateSentanceAndStartScrolling();
+    LEDLightBoard.CreateSentanceAndStartScrolling();
 }();
 
-
-/*
-function animLoop( render, element ) {
-    var running, lastFrame = +new Date;
-    function loop( now ) {
-        // stop the loop if render returned false
-        if ( running !== false ) {
-            requestAnimationFrame( loop, element );
-            var deltaT = now - lastFrame;
-            // do not render frame when deltaT is too high
-            if ( deltaT < 160 ) {
-                running = render( deltaT );
-            }
-            lastFrame = now;
-        }
-    }
-    loop( lastFrame );
-}
-*/
 
 
 
