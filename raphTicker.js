@@ -1,59 +1,29 @@
-var 
-    colBackground = "black",
-    colLightOff = "#422",
-    colLightOn = "red",
-    colStroke = "black"
-    speedLightOn = 20,
-    speedLightOff =20,
-    lightHolder = [[]],
-    QueuedLights = [],
-    boardWidth = 160,
-    boardHeight = 15,
-    textHeight = 8,
-    currentLight = [],
-    currentLights = [],//textMap = [],
-    mySentanceArray = [],
-    dirArray = [];
+var textHeight = 8;
+    
+    
+var SentanceFactory = function() {
+    var mySentanceArray = [],
+        dirArray = [];
+    this.NextSentance = function() {
+        if(mySentanceArray.length === 0) {
+           mySentanceArray = ["WOWIE", "HELLO HOW ARE YOU?", "THIS IS A REALLY LONG SENTANCE I WONDER IF IT STILL WORKS"]
+        }
+        if(dirArray.length === 0) {
+           dirArray = ["Up","Down","Left","Right"];
+        }
+        firstAnimationText.SetDirection(dirArray.shift());
+        return mySentanceArray.shift();
+    }; 
+};
+var sentanceFactory = new SentanceFactory();
 
 
-
-var scrollerQueue = {
-    Left: function() {
-        var queud = QueuedLights.shift();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(boardWidth - 1,queud[i]));
-            }
-        }
-    },
-    Right: function() {
-        var queud = QueuedLights.pop();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(1,queud[i]));
-            }
-        }
-        
-    },
-    Up: function() {
-        var queud = QueuedLights.shift();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],boardHeight - 1));
-            }
-        }
-    },
-    Down: function() {
-        var queud = QueuedLights.pop();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],1));
-            }
-        }
-        
-    }
-}
 var Light = function(row,column,lightBoard)  {
+    var colLightOff = "#422",
+        colLightOn = "red",
+        colStroke = "black"
+        speedLightOn = 4000,
+        speedLightOff =4000;
     this.row = row;
     this.column = column;
     this.LightBoard = lightBoard;
@@ -79,7 +49,7 @@ var Light = function(row,column,lightBoard)  {
     };
     this.Off = function(){
         //var anim = Raphael.animation({
-         this.graphic.attr({
+        this.graphic.attr({
             "stroke-width": 1,
             "fill": colLightOff,
             "stroke": colStroke
@@ -102,6 +72,7 @@ var Light = function(row,column,lightBoard)  {
     return this;
 }
 var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
+    var lightHolder = [[]];
     this.Font= Fonts.Simple8();
     this.LightPadding = 1;
     this.LightWidth = 4;
@@ -110,6 +81,8 @@ var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
     };
     this.width = lightsAlong * 6 + 4;
     this.height = lightsUp * 6 + 4;
+    this.LightsAlong = lightsAlong;
+    this.LightsUp = lightsUp;
     
     this.Paper= Raphael(elementID, this.width, this.height);
     this.TextAnimations = [];
@@ -125,32 +98,24 @@ var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
     };
     this.Left= function(row,column) {
         if(row === 0) {
-            //setTimeout('pixelOffScreen("","Left","' + row + '","' + column + '")', 20);
-            pixelOffScreen("","Left",row,column);
             return this.OffscreenLight;
         }
         return this.GetLightAt(row-1,column);
     };
     this.Right= function(row,column) {
-        if(row === boardWidth-1) {
-            //setTimeout('pixelOffScreen("","Right","' + row + '","' + column + '")', 20);
-            pixelOffScreen("","Right",row,column);
+        if(row === this.LightsAlong-1) {
             return this.OffscreenLight;
         }
         return this.GetLightAt(row+1,column);
     };
     this.Up= function(row,column) {
         if(column === 0) {
-            //setTimeout('pixelOffScreen("","Up","' + row + '","' + column + '")', 20);
-            pixelOffScreen("","Up",row,column);
             return this.OffscreenLight;
         }
         return this.GetLightAt(row,column-1);
     };
     this.Down= function(row,column) {
-        if(column === boardHeight-1) {
-            //setTimeout('pixelOffScreen("","Down","' + row + '","' + column + '")', 20);
-            pixelOffScreen("","Down",row,column);
+        if(column === this.LightsUP-1) {
             return this.OffscreenLight;
         }
         return this.GetLightAt(row,column+1);
@@ -170,7 +135,6 @@ var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
         }
         lightHolder[row][column] = myLight;
     };
-    //this.createLights(lightsAlong, lightsUp);
     this.PrepareLights(lightsAlong, lightsUp);
     this.OffscreenLight = new Light(-10,-10, this);
     
@@ -186,16 +150,61 @@ var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
 var TextGenerator = function(lightBoard) {
     this.TextMap;
     this.LightBoard = lightBoard;
+    this.LightBoard.AddTextAnimation(this);
     this.dir;
     this.NextScrollFrame;
+    
+    var scrollerQueue = {
+        Left: function() {
+            var queud = QueuedLights.shift();
+            if(queud) {
+                for(var i=0, l=queud.length; i < l; i++){
+                    currentLights.push(firstLEDLightBoard.GetLightAt(this.LightBoard.LightsAlong - 1,queud[i]));
+                }
+            }
+        },
+        Right: function() {
+            var queud = QueuedLights.pop();
+            if(queud) {
+                for(var i=0, l=queud.length; i < l; i++){
+                    currentLights.push(firstLEDLightBoard.GetLightAt(1,queud[i]));
+                }
+            }
+            
+        },
+        Up: function() {
+            var queud = QueuedLights.shift();
+            if(queud) {
+                for(var i=0, l=queud.length; i < l; i++){
+                    currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],this.LightBoard.LightsUp - 1));
+                }
+            }
+        },
+        Down: function() {
+            var queud = QueuedLights.pop();
+            if(queud) {
+                for(var i=0, l=queud.length; i < l; i++){
+                    currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],1));
+                }
+            }
+            
+        }
+    },
+    QueuedLights = [],
+    currentLights = [];
     this.SetDirection = function(direction) {
         this.dir = direction;
         this.NextScrollFrame = scrollerQueue[this.dir];
+        
+    }
+    this.Go = function() {
+        this.CreateSentanceAndStartScrolling();
+        this.startTimer();
     }
     //this.currentLights =[];
     this.CreateSentanceAndStartScrolling = function ()
     {
-        this.TextMap = this.GetTextMap(NextSentance());//arrText[0]);
+        this.TextMap = this.GetTextMap(sentanceFactory.NextSentance());//arrText[0]);
         
         var temp = this[this.dir](this.TextMap);
         QueuedLights = temp.Queued;
@@ -204,7 +213,6 @@ var TextGenerator = function(lightBoard) {
     };
     this.GetTextMap= function (text) {
         //!Check this function
-        var paddingAtStart = boardWidth;
         var textMap = [];
         var totalCols = 0;
         for(var i=0, l=text.length; i < l; i++){
@@ -214,29 +222,15 @@ var TextGenerator = function(lightBoard) {
                     textMap[totalCols] = charMap[j];
                     totalCols++;
                 }
-                // Add a blank col
                 textMap[totalCols] = [];
                 totalCols++;
             }
         }
         return textMap;
     };
-    this.StartPlot = {
-        Left: function(myText) {
-            return [boardWidth+myText.length,Math.round(boardHeight/2) - Math.round(textHeight/2)];
-        },
-        Right: function(myText) {
-            return [0-myText.length,Math.round(boardHeight/2) - Math.round(textHeight/2)];
-        },
-        Up: function(myText) {
-            return [Math.round(boardWidth/2) - Math.round(myText.length/2),boardHeight];
-        },
-        Down: function(myText) {
-            return [Math.round(boardWidth/2) - Math.round(myText.length/2),0-boardHeight];
-        }        
-    };
+    
     this.Left = function(myText) {
-        var currentStartPlot = this.StartPlot.Left(myText),
+        var currentStartPlot = [this.LightBoard.LightsAlong+myText.length,Math.round(this.LightBoard.LightsUp/2) - Math.round(textHeight/2)],
             onscreenLights = [],
             myQueuedLights = [];
         for(var rowIndex=0, rowMax=myText.length; rowIndex<rowMax; rowIndex++)
@@ -257,8 +251,8 @@ var TextGenerator = function(lightBoard) {
         }   
         return {Onscreen:onscreenLights,Queued:myQueuedLights};
     };
-     this.Right = function(myText) {
-        var currentStartPlot = this.StartPlot.Right(myText),
+    this.Right = function(myText) {
+        var currentStartPlot = [0-myText.length,Math.round(this.LightBoard.LightsUp/2) - Math.round(textHeight/2)],
             onscreenLights = [],
             myQueuedLights = [];
         for(var rowIndex=0, rowMax=myText.length; rowIndex<rowMax; rowIndex++)
@@ -279,8 +273,8 @@ var TextGenerator = function(lightBoard) {
         }   
         return {Onscreen:onscreenLights,Queued:myQueuedLights};
     };
-     this.Up = function(myText) {
-        var currentStartPlot = this.StartPlot.Up(myText),
+    this.Up = function(myText) {
+        var currentStartPlot = [Math.round(this.LightBoard.LightsAlong/2) - Math.round(myText.length/2),this.LightBoard.LightsUp],
             onscreenLights = [],
             myQueuedLights = [];
         for(var rowIndex=0, rowMax=myText.length; rowIndex<rowMax; rowIndex++)
@@ -302,7 +296,7 @@ var TextGenerator = function(lightBoard) {
         return {Onscreen:onscreenLights,Queued:myQueuedLights};
     };
     this.Down = function(myText) {
-        var currentStartPlot = this.StartPlot.Down(myText),
+        var currentStartPlot = [Math.round(this.LightBoard.LightsAlong/2) - Math.round(myText.length/2),0-this.LightBoard.LightsUp],
             onscreenLights = [],
             myQueuedLights = [];
         for(var rowIndex=0, rowMax=myText.length; rowIndex<rowMax; rowIndex++)
@@ -343,7 +337,7 @@ var TextGenerator = function(lightBoard) {
             }
         }
         if(totalOffLights === currentLights.length && QueuedLights.length === 0) {
-            sequenceOffScreen("", [this.dir]);
+            this.sequenceOffScreen("", [this.dir]);
         } 
     }
     
@@ -356,18 +350,40 @@ var TextGenerator = function(lightBoard) {
             inst.ScrollText(); 
         },75); 
     };
-    this.startTimer();
+    //this.startTimer();
+    
+    
+    this.sequenceOffScreen = function(e, type)
+    {
+        this.CreateSentanceAndStartScrolling();
+    };
+    this.pixelOffScreen = function(e, type, row, column)
+    {
+        //Pixel left screen :)
+    };
+    
+
+
+    /*var docReady = function(){
+    //firstLEDLightBoard.createLights(boardWidth, boardHeight);
+        firstAnimationText.CreateSentanceAndStartScrolling();
+    }();*/
+
+    
 };
 
-var firstLEDLightBoard = new LEDLightBoard(boardWidth,boardHeight,"board");
+var firstLEDLightBoard = new LEDLightBoard(160,15,"board");
 var firstAnimationText = new TextGenerator(firstLEDLightBoard);
 firstLEDLightBoard.AddTextAnimation(firstAnimationText);
-
+firstAnimationText.Go();
 //var secondAnimationText = new TextGenerator(firstLEDLightBoard);
 //firstLEDLightBoard.AddTextAnimation(secondAnimationText);
+//secondAnimationText.Go();
 
 // We'll need Array.indexOf method which IE dosent support yet.
 if(!Array.indexOf){ Array.prototype.indexOf = function(obj){ for(var i=0; i<this.length; i++){ if(this[i]==obj){ return i; } } return -1; } }
+
+
 
 
 
@@ -418,32 +434,5 @@ animLoop(function( deltaT, now ) {
 // */
 
 //Events
-var sequenceOffScreen = function(e, type)
-{
-    firstAnimationText.CreateSentanceAndStartScrolling();
-},
-    pixelOffScreen = function(e, type, row, column)
-{
-    //Pixel left screen :)
-};
-    
-var NextSentance = function() {
-    if(mySentanceArray.length === 0) {
-       mySentanceArray = ["WOWIE", "HELLO HOW ARE YOU?", "THIS IS A REALLY LONG SENTANCE I WONDER IF IT STILL WORKS"]
-    }
-    if(dirArray.length === 0) {
-       dirArray = ["Up","Down","Left","Right"];
-    }
-    firstAnimationText.SetDirection(dirArray.shift());
-    return mySentanceArray.shift();
-}
-
-
-var docReady = function(){
-    //firstLEDLightBoard.createLights(boardWidth, boardHeight);
-    firstAnimationText.CreateSentanceAndStartScrolling();
-}();
-
-
 
 
