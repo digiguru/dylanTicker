@@ -11,13 +11,48 @@ var
     boardHeight = 15,
     textHeight = 8,
     currentLight = [],
-    dir = "Right";
-    //textMap = [],
-    currentLights =[],
+    currentLights = [],//textMap = [],
     mySentanceArray = [],
     dirArray = [];
 
 
+
+var scrollerQueue = {
+    Left: function() {
+        var queud = QueuedLights.shift();
+        if(queud) {
+            for(var i=0, l=queud.length; i < l; i++){
+                currentLights.push(firstLEDLightBoard.GetLightAt(boardWidth - 1,queud[i]));
+            }
+        }
+    },
+    Right: function() {
+        var queud = QueuedLights.pop();
+        if(queud) {
+            for(var i=0, l=queud.length; i < l; i++){
+                currentLights.push(firstLEDLightBoard.GetLightAt(1,queud[i]));
+            }
+        }
+        
+    },
+    Up: function() {
+        var queud = QueuedLights.shift();
+        if(queud) {
+            for(var i=0, l=queud.length; i < l; i++){
+                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],boardHeight - 1));
+            }
+        }
+    },
+    Down: function() {
+        var queud = QueuedLights.pop();
+        if(queud) {
+            for(var i=0, l=queud.length; i < l; i++){
+                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],1));
+            }
+        }
+        
+    }
+}
 var Light = function(row,column,lightBoard)  {
     this.row = row;
     this.column = column;
@@ -151,12 +186,18 @@ var LEDLightBoard = function(lightsAlong, lightsUp, elementID) {
 var TextGenerator = function(lightBoard) {
     this.TextMap;
     this.LightBoard = lightBoard;
+    this.dir;
+    this.NextScrollFrame;
+    this.SetDirection = function(direction) {
+        this.dir = direction;
+        this.NextScrollFrame = scrollerQueue[this.dir];
+    }
     //this.currentLights =[];
     this.CreateSentanceAndStartScrolling = function ()
     {
         this.TextMap = this.GetTextMap(NextSentance());//arrText[0]);
         
-        var temp = this[dir](this.TextMap);
+        var temp = this[this.dir](this.TextMap);
         QueuedLights = temp.Queued;
         this.LightBoard.Draw(temp.Onscreen);
         //scrollText();  
@@ -284,30 +325,38 @@ var TextGenerator = function(lightBoard) {
     };
     
     
+    
     this.ScrollText = function () {
         var totalOffLights = 0;
         for(var i=0, l=currentLights.length; i<l; i++){
             if (currentLights[i] && currentLights[i] !== firstLEDLightBoard.OffscreenLight) {
-                currentLights[i] = currentLights[i].Off()[dir]();
+                currentLights[i] = currentLights[i].Off()[this.dir]();
             } else {
                 totalOffLights ++;
             }
         }
-    
-        scrollerQueue[dir]();
+        //scrollerQueue[this.dir]();
+        this.NextScrollFrame();
         for(var i=0, l=currentLights.length; i<l; i++){
             if (currentLights[i] && currentLights[i] !== firstLEDLightBoard.OffscreenLight) {
                 currentLights[i] = currentLights[i].On();
             }
         }
         if(totalOffLights === currentLights.length && QueuedLights.length === 0) {
-            sequenceOffScreen("", [dir]);
-        } else {
-            //setTimeout('scrollText()', 25);
-            
-        }
+            sequenceOffScreen("", [this.dir]);
+        } 
     }
-    this.timer = setInterval(this.ScrollText, 75);
+    
+    var timer;
+    this.startTimer=function(){ 
+        var inst=this; 
+        console.log('startTimer this: ',this); 
+        timer=setInterval(function(){ 
+            console.log('setInterval this: ',this); 
+            inst.ScrollText(); 
+        },75); 
+    };
+    this.startTimer();
 };
 
 var firstLEDLightBoard = new LEDLightBoard(boardWidth,boardHeight,"board");
@@ -320,43 +369,6 @@ firstLEDLightBoard.AddTextAnimation(firstAnimationText);
 // We'll need Array.indexOf method which IE dosent support yet.
 if(!Array.indexOf){ Array.prototype.indexOf = function(obj){ for(var i=0; i<this.length; i++){ if(this[i]==obj){ return i; } } return -1; } }
 
-
-var scrollerQueue = {
-    Left: function() {
-        var queud = QueuedLights.shift();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(boardWidth - 1,queud[i]));
-            }
-        }
-    },
-    Right: function() {
-        var queud = QueuedLights.pop();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(1,queud[i]));
-            }
-        }
-        
-    },
-    Up: function() {
-        var queud = QueuedLights.shift();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],boardHeight - 1));
-            }
-        }
-    },
-    Down: function() {
-        var queud = QueuedLights.pop();
-        if(queud) {
-            for(var i=0, l=queud.length; i < l; i++){
-                currentLights.push(firstLEDLightBoard.GetLightAt(queud[i],1));
-            }
-        }
-        
-    }
-}
 
 
 
@@ -422,7 +434,7 @@ var NextSentance = function() {
     if(dirArray.length === 0) {
        dirArray = ["Up","Down","Left","Right"];
     }
-    dir = dirArray.shift();
+    firstAnimationText.SetDirection(dirArray.shift());
     return mySentanceArray.shift();
 }
 
