@@ -56,6 +56,6 @@ var Fonts =  {
         map['"'] = [[0,1],[],[0,1]];
         map['?'] = [[1],[0],[0,4,5,7],[0,3],[1,2]];
     
-        return map;
+        return {Map:map, Height:8};
     }
 }
