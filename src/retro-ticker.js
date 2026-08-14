@@ -12,13 +12,15 @@ template.innerHTML = `
       --ticker-background: #090706;
       --ticker-pixel-size: 10px;
       --ticker-duration: 12s;
+      --ticker-distance: 1000px;
+      --ticker-start-offset: 0px;
+      --ticker-steps: 100;
       display: block;
       contain: content;
     }
 
     .board {
       position: relative;
-      container-type: inline-size;
       height: calc(var(--ticker-pixel-size) * 8);
       overflow: hidden;
       border: 1px solid color-mix(in srgb, var(--ticker-color) 30%, #333);
@@ -39,11 +41,11 @@ template.innerHTML = `
     .message {
       position: absolute;
       inset-block: 0;
-      left: 100%;
+      left: calc(100% + var(--ticker-start-offset));
       display: flex;
       width: max-content;
       height: 100%;
-      animation: ticker-scroll var(--ticker-duration) linear infinite;
+      animation: ticker-scroll var(--ticker-duration) steps(var(--ticker-steps), end) infinite;
       will-change: transform;
       filter: drop-shadow(0 0 calc(var(--ticker-pixel-size) * 0.35) var(--ticker-color));
     }
@@ -65,7 +67,7 @@ template.innerHTML = `
 
     @keyframes ticker-scroll {
       from { transform: translateX(0); }
-      to { transform: translateX(calc(-100% - 100cqw)); }
+      to { transform: translateX(calc(var(--ticker-distance) * -1)); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -201,8 +203,17 @@ export class RetroTicker extends HTMLElement {
   }
 
   #updateDuration() {
-    const visibleColumns = this.#boardElement.clientWidth / this.pixelSize;
-    const duration = Math.max(2, (this.#columns.length + visibleColumns) / this.speed);
+    const boardWidth = this.#boardElement.clientWidth;
+    const remainder = boardWidth % this.pixelSize;
+    const startOffset = remainder === 0 ? 0 : this.pixelSize - remainder;
+    const visibleColumns = Math.ceil(boardWidth / this.pixelSize);
+    const steps = this.#columns.length + visibleColumns;
+    const duration = Math.max(2, steps / this.speed);
+    const distance = steps * this.pixelSize;
+
+    this.style.setProperty('--ticker-start-offset', `${startOffset}px`);
+    this.style.setProperty('--ticker-distance', `${distance}px`);
+    this.style.setProperty('--ticker-steps', String(steps));
     this.style.setProperty('--ticker-duration', `${duration.toFixed(2)}s`);
   }
 }

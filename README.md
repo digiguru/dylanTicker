@@ -67,6 +67,6 @@ This is a leaf-level visual component, not an application. A standard custom ele
 
 ## How the animation works
 
-The bitmap font is converted into columns of lit rows. Those columns are drawn into small canvas chunks. CSS then translates the message from just outside one edge of the ticker to just outside the other using container query units (`cqw`), so the browser can animate the transform without JavaScript touching every frame.
+The bitmap font is converted into columns of lit rows. Those columns are drawn into small canvas chunks. CSS then translates the message from just outside one edge of the ticker to just outside the other. The transform uses `steps()` aligned to the LED pitch, so lit pixels advance one physical column at a time while the browser still owns every animation frame.
 
 The Git history contains the original jQuery and Raphael implementations if you want to admire the fossils.
