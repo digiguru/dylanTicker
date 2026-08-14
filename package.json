@@ -5,7 +5,7 @@
   "type": "module",
   "description": "A zero-dependency retro dot-matrix scrolling ticker Web Component.",
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   },
   "scripts": {
     "lint": "node --check src/font.js && node --check src/retro-ticker.js && node --check src/demo.js && node --check scripts/build.mjs && node --check test/font.test.js",
