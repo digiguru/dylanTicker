@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090706" />
+    <title>dylanTicker — modern retro LED ticker</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <p class="eyebrow">dylanTicker / rebooted</p>
+        <h1>Retro scrolling text.<br />Without the retro JavaScript.</h1>
+        <p>
+          A zero-dependency Web Component. Canvas draws the LEDs once; native CSS
+          does the moving.
+        </p>
+      </header>
+
+      <section class="demo" aria-labelledby="demo-title">
+        <div class="demo-heading">
+          <div>
+            <p class="eyebrow">Live demo</p>
+            <h2 id="demo-title">Make it say something silly</h2>
+          </div>
+          <button id="pause" type="button">Pause</button>
+        </div>
+
+        <retro-ticker
+          id="ticker"
+          message="WELCOME TO DYLANTICKER. SAME RETRO ENERGY. ZERO JQUERY."
+          speed="14"
+          pixel-size="10"
+          direction="left"
+          pause-on-hover
+        ></retro-ticker>
+
+        <form id="controls" class="controls">
+          <label class="wide">
+            Message
+            <textarea name="message" rows="4">WELCOME TO DYLANTICKER. SAME RETRO ENERGY. ZERO JQUERY.</textarea>
+          </label>
+
+          <label>
+            Speed
+            <input name="speed" type="range" min="4" max="40" value="14" />
+            <output id="speed-output">14 cols/s</output>
+          </label>
+
+          <label>
+            LED size
+            <input name="pixelSize" type="range" min="4" max="18" value="10" />
+            <output id="size-output">10px</output>
+          </label>
+
+          <label>
+            Direction
+            <select name="direction">
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+
+          <label>
+            LED colour
+            <input name="color" type="color" value="#ff3b30" />
+          </label>
+        </form>
+      </section>
+
+      <section class="notes">
+        <article>
+          <span>01</span>
+          <h3>Framework-free</h3>
+          <p>Use it in plain HTML, React, Vue, Svelte, or whatever wins next Tuesday.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>CSS-driven motion</h3>
+          <p>No setInterval loop. The browser compositor handles the scrolling transform.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Built for long copy</h3>
+          <p>Long messages are rendered into canvas chunks instead of thousands of LED elements.</p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./src/demo.js"></script>
+  </body>
+</html>

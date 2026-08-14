@@ -1,0 +1,16 @@
+{
+  "name": "dylan-ticker",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A zero-dependency retro dot-matrix scrolling ticker Web Component.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "node --check src/font.js && node --check src/retro-ticker.js && node --check src/demo.js && node --check scripts/build.mjs && node --check test/font.test.js",
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "check": "npm run lint && npm test && npm run build"
+  }
+}
