@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="DylanTicker">
+  <rect width="256" height="256" rx="42" fill="#070707"/>
+  <rect x="28" y="28" width="200" height="200" rx="30" fill="#140706" stroke="#35100D" stroke-width="8"/>
+  <g fill="#3A1715">
+    <circle cx="66" cy="60" r="10"/><circle cx="96" cy="60" r="10"/><circle cx="126" cy="60" r="10"/><circle cx="156" cy="60" r="10"/><circle cx="186" cy="60" r="10"/>
+    <circle cx="66" cy="90" r="10"/><circle cx="96" cy="90" r="10"/><circle cx="126" cy="90" r="10"/><circle cx="156" cy="90" r="10"/><circle cx="186" cy="90" r="10"/>
+    <circle cx="66" cy="120" r="10"/><circle cx="96" cy="120" r="10"/><circle cx="126" cy="120" r="10"/><circle cx="156" cy="120" r="10"/><circle cx="186" cy="120" r="10"/>
+    <circle cx="66" cy="150" r="10"/><circle cx="96" cy="150" r="10"/><circle cx="126" cy="150" r="10"/><circle cx="156" cy="150" r="10"/><circle cx="186" cy="150" r="10"/>
+    <circle cx="66" cy="180" r="10"/><circle cx="96" cy="180" r="10"/><circle cx="126" cy="180" r="10"/><circle cx="156" cy="180" r="10"/><circle cx="186" cy="180" r="10"/>
+  </g>
+  <g fill="#FF6B61">
+    <circle cx="66" cy="60" r="10"/><circle cx="96" cy="60" r="10"/><circle cx="126" cy="60" r="10"/>
+    <circle cx="66" cy="90" r="10"/><circle cx="126" cy="90" r="10"/><circle cx="156" cy="90" r="10"/>
+    <circle cx="66" cy="120" r="10"/><circle cx="156" cy="120" r="10"/><circle cx="186" cy="120" r="10"/>
+    <circle cx="66" cy="150" r="10"/><circle cx="156" cy="150" r="10"/><circle cx="186" cy="150" r="10"/>
+    <circle cx="66" cy="180" r="10"/><circle cx="96" cy="180" r="10"/><circle cx="126" cy="180" r="10"/><circle cx="156" cy="180" r="10"/>
+  </g>
+</svg>
